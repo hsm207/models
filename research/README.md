@@ -22,6 +22,7 @@ request.
     for visual navigation.
 -   [compression](compression): compressing and decompressing images using a
     pre-trained Residual GRU network.
+-   [deep_speech](deep_speech): automatic speech recognition.
 -   [deeplab](deeplab): deep labeling for semantic image segmentation.
 -   [delf](delf): deep local features for image matching and retrieval.
 -   [differential_privacy](differential_privacy): differential privacy for training
@@ -39,6 +40,7 @@ request.
 -   [lfads](lfads): sequential variational autoencoder for analyzing
     neuroscience data.
 -   [lm_1b](lm_1b): language modeling on the one billion word benchmark.
+-   [lm_commonsense](lm_commonsense): commonsense reasoning using language models.
 -   [maskgan](maskgan): text generation with GANs.
 -   [namignizer](namignizer): recognize and generate names.
 -   [neural_gpu](neural_gpu): highly parallel neural computer.
@@ -58,6 +60,8 @@ request.
 -   [rebar](rebar): low-variance, unbiased gradient estimates for discrete
     latent variable models.
 -   [resnet](resnet): deep and wide residual networks.
+-   [seq2species](seq2species): deep learning solution for read-level taxonomic
+    classification.
 -   [skip_thoughts](skip_thoughts): recurrent neural network sentence-to-vector
     encoder.
 -   [slim](slim): image classification models in TF-Slim.
@@ -70,5 +74,7 @@ request.
     summarization.
 -   [transformer](transformer): spatial transformer network, which allows the
     spatial manipulation of data within the network.
+-   [vid2depth](vid2depth): learning depth and ego-motion unsupervised from
+    raw monocular video.
 -   [video_prediction](video_prediction): predicting future video frames with
     neural advection.

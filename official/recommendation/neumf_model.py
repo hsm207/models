@@ -36,14 +36,14 @@ from __future__ import print_function
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from official.recommendation import constants  # pylint: disable=g-bad-import-order
+from official.datasets import movielens  # pylint: disable=g-bad-import-order
 
 
 class NeuMF(tf.keras.models.Model):
   """Neural matrix factorization (NeuMF) model for recommendations."""
 
   def __init__(self, num_users, num_items, mf_dim, model_layers, batch_size,
-               mf_regularization=0):
+               mf_regularization, mlp_reg_layers):
     """Initialize NeuMF model.
 
     Args:
@@ -54,8 +54,10 @@ class NeuMF(tf.keras.models.Model):
         Note that the first layer is the concatenation of user and item
         embeddings. So model_layers[0]//2 is the embedding size for MLP.
       batch_size: An integer for the batch size.
-      mf_regularization: A floating number, the regularization for MF
+      mf_regularization: A floating number, the regularization factor for MF
         embeddings.
+      mlp_reg_layers: A list of floating numbers, the regularization factors for
+        each layer in MLP.
 
     Raises:
       ValueError: if the first model layer is not even.
@@ -65,9 +67,9 @@ class NeuMF(tf.keras.models.Model):
 
     # Input variables
     user_input = tf.keras.layers.Input(
-        shape=(1,), dtype=tf.int32, name=constants.USER)
+        shape=(1,), dtype=tf.int32, name=movielens.USER_COLUMN)
     item_input = tf.keras.layers.Input(
-        shape=(1,), dtype=tf.int32, name=constants.ITEM)
+        shape=(1,), dtype=tf.int32, name=movielens.ITEM_COLUMN)
 
     # Initializer for embedding layer
     embedding_initializer = tf.keras.initializers.RandomNormal(stddev=0.01)
@@ -89,13 +91,13 @@ class NeuMF(tf.keras.models.Model):
         num_users,
         model_layers[0]//2,
         embeddings_initializer=embedding_initializer,
-        embeddings_regularizer=tf.keras.regularizers.l2(model_layers[0]),
+        embeddings_regularizer=tf.keras.regularizers.l2(mlp_reg_layers[0]),
         input_length=1)
     mlp_embedding_item = tf.keras.layers.Embedding(
         num_items,
         model_layers[0]//2,
         embeddings_initializer=embedding_initializer,
-        embeddings_regularizer=tf.keras.regularizers.l2(model_layers[0]),
+        embeddings_regularizer=tf.keras.regularizers.l2(mlp_reg_layers[0]),
         input_length=1)
 
     # GMF part
@@ -113,9 +115,10 @@ class NeuMF(tf.keras.models.Model):
     mlp_vector = tf.keras.layers.concatenate([mlp_user_latent, mlp_item_latent])
 
     num_layer = len(model_layers)  # Number of layers in the MLP
-    for idx in xrange(1, num_layer):
+    for layer in xrange(1, num_layer):
       model_layer = tf.keras.layers.Dense(
-          model_layers[idx],
+          model_layers[layer],
+          kernel_regularizer=tf.keras.regularizers.l2(mlp_reg_layers[layer]),
           activation="relu")
       mlp_vector = model_layer(mlp_vector)
 
@@ -125,7 +128,7 @@ class NeuMF(tf.keras.models.Model):
     # Final prediction layer
     prediction = tf.keras.layers.Dense(
         1, activation="sigmoid", kernel_initializer="lecun_uniform",
-        name=constants.RATING)(predict_vector)
+        name=movielens.RATING_COLUMN)(predict_vector)
 
     super(NeuMF, self).__init__(
         inputs=[user_input, item_input], outputs=prediction)
